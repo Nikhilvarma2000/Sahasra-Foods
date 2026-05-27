@@ -10,196 +10,161 @@ import "swiper/css/pagination"
 import "swiper/css/effect-fade"
 
 import { motion } from "framer-motion"
-
-import {
-  FaWhatsapp,
-  FaArrowRight,
-} from "react-icons/fa"
+import { FaArrowRight, FaStar, FaShippingFast, FaAward } from "react-icons/fa"
 
 function Hero() {
 
+  // UPDATED WITH MANGO, GONGURA, AND CHICKEN PICKLE IMAGES
   const slides = [
     {
       image:
-        "https://images.unsplash.com/photo-1601050690597-df0568f70950?q=80&w=2070&auto=format&fit=crop",
+        "https://t3.ftcdn.net/jpg/04/20/07/28/360_F_420072816_fF0EFAl8TZfoQjJMMj0QH9SL7Z9VcrP8.jpg",
       title: "Authentic Andhra Pickles",
       subtitle:
         "Prepared with traditional recipes, homemade love, and premium ingredients.",
     },
-
     {
       image:
-        "https://images.unsplash.com/photo-1504674900247-0877df9cc836?q=80&w=2070&auto=format&fit=crop",
+        "https://bhimavarampickels.com/wp-content/uploads/2025/03/chicken-piclle.webp",
       title: "Taste That Feels Like Home",
       subtitle:
         "Fresh ingredients. Rich flavors. No preservatives. Pure homemade goodness.",
     },
-
     {
       image:
-        "https://images.unsplash.com/photo-1547592180-85f173990554?q=80&w=2070&auto=format&fit=crop",
+        "https://sumadhurafoods.com/cdn/shop/files/I5A1821.jpg?v=1716974990",
       title: "Handcrafted With Tradition",
       subtitle:
         "Every jar is carefully prepared in small batches with authentic Andhra spice blends.",
     },
   ]
 
-  // SCROLL TO PRODUCTS
-  const handleExplore = () => {
-
-    const section =
-      document.getElementById("products")
-
+  const handleOrderNow = () => {
+    const section = document.getElementById("products")
     if (section) {
-
       section.scrollIntoView({
         behavior: "smooth",
+        block: "start",
       })
     }
-  }
-
-  // WHATSAPP
-  const handleWhatsApp = () => {
-
-    const message =
-      "Hello Sahasra Foods 👋 I would like to know more about your homemade products."
-
-    const whatsappUrl =
-      `https://wa.me/919150299458?text=${encodeURIComponent(message)}`
-
-    window.open(
-      whatsappUrl,
-      "_blank"
-    )
   }
 
   return (
     <section
       id="home"
-      className="relative"
+      className="relative overflow-hidden bg-black"
     >
-
       <Swiper
-        modules={[
-          Autoplay,
-          Pagination,
-          EffectFade,
-        ]}
+        modules={[Autoplay, Pagination, EffectFade]}
         effect="fade"
         autoplay={{
-          delay: 4000,
+          delay: 5000,
           disableOnInteraction: false,
         }}
         pagination={{
           clickable: true,
+          dynamicBullets: true,
         }}
         loop={true}
-        className="h-screen"
+        className="h-[80vh] sm:h-[85vh]"
       >
-
         {slides.map((slide, index) => (
-
-          <SwiperSlide key={index}>
-
-            <div
-              className="relative h-screen bg-cover bg-center"
+          <SwiperSlide key={index} className="overflow-hidden">
+            <motion.div
+              initial={{ scale: 1 }}
+              animate={{ scale: 1.08 }}
+              transition={{ duration: 6, ease: "linear" }}
+              className="absolute inset-0 bg-cover bg-center"
               style={{
                 backgroundImage: `url(${slide.image})`,
               }}
-            >
+            />
 
-              {/* OVERLAY */}
-              <div className="absolute inset-0 bg-gradient-to-r from-black/85 via-black/55 to-black/20"></div>
+            <div className="absolute inset-0 bg-gradient-to-r from-black/90 via-black/60 to-black/30 z-0" />
+            <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-black/20 z-0" />
+            <div className="absolute bottom-[-10%] left-[-10%] w-[500px] h-[500px] bg-[#D4A437]/10 blur-[120px] rounded-full pointer-events-none z-0"></div>
 
-              {/* GLOW */}
-              <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-[#D4A437]/20 blur-3xl rounded-full"></div>
+            <div className="relative z-10 h-full flex items-center">
+              <div className="max-w-7xl mx-auto px-6 sm:px-8 lg:px-12 w-full">
+                <div className="max-w-3xl">
+                  
+                  <motion.div
+                    initial={{ opacity: 0, y: 25 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.6, delay: 0.2 }}
+                    className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 backdrop-blur-md border border-white/10 text-white text-xs tracking-[3px] uppercase font-bold mb-6"
+                  >
+                    <span className="text-[#D4A437]">🔥</span> Homemade • Traditional • Premium
+                  </motion.div>
 
-              {/* CONTENT */}
-              <div className="relative z-10 h-full flex items-center">
+                  <motion.h1
+                    initial={{ opacity: 0, y: 30 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.7, delay: 0.3 }}
+                    className="text-4xl sm:text-6xl lg:text-7xl leading-[1.08] font-bold text-white font-serif tracking-tight mb-5 drop-shadow-[0_4px_12px_rgba(0,0,0,0.5)]"
+                    style={{ fontFamily: "'Cinzel', 'Georgia', serif" }}
+                  >
+                    {slide.title}
+                  </motion.h1>
 
-                <div className="max-w-7xl mx-auto px-5 sm:px-6 lg:px-10 w-full">
+                  <motion.p
+                    initial={{ opacity: 0, y: 35 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.8, delay: 0.4 }}
+                    className="text-base sm:text-lg lg:text-xl text-gray-300 font-normal leading-relaxed mb-10 max-w-2xl drop-shadow-md"
+                  >
+                    {slide.subtitle}
+                  </motion.p>
 
                   <motion.div
-                    initial={{
-                      opacity: 0,
-                      y: 60,
-                    }}
-                    animate={{
-                      opacity: 1,
-                      y: 0,
-                    }}
-                    transition={{
-                      duration: 1,
-                    }}
-                    className="max-w-3xl"
+                    initial={{ opacity: 0, y: 40 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.8, delay: 0.5 }}
+                    className="flex flex-wrap gap-4"
                   >
+                    <button
+                      onClick={handleOrderNow}
+                      className="group relative h-14 px-10 rounded-xl bg-gradient-to-r from-[#6E0E12] to-[#92141a] text-white font-bold text-sm sm:text-base tracking-wide flex items-center justify-center gap-3 hover:from-[#821217] hover:to-[#a61820] transition-all duration-300 shadow-[0_15px_35px_rgba(110,14,18,0.4)] active:scale-[0.98] cursor-pointer"
+                    >
+                      <span>Order Now</span>
+                      <FaArrowRight className="text-xs group-hover:translate-x-1.5 transition-transform duration-300" />
+                    </button>
+                  </motion.div>
 
-                    {/* BADGE */}
-                    <div className="inline-flex items-center gap-3 px-5 py-3 rounded-full bg-white/10 backdrop-blur-xl border border-white/10 text-white text-xs sm:text-sm tracking-[3px] uppercase font-semibold mb-6">
-
-                      🔥 Homemade • Traditional • Premium
+                  <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ duration: 1, delay: 0.7 }}
+                    className="flex flex-wrap items-center gap-4 mt-12 border-t border-white/10 pt-8"
+                  >
+                    <div className="flex items-center gap-2 text-white/90 text-xs sm:text-sm font-medium">
+                      <FaStar className="text-[#D4A437] text-xs" />
+                      <span>5000+ Happy Customers</span>
                     </div>
-
-                    {/* HEADING */}
-                    <h1 className="text-5xl sm:text-6xl lg:text-8xl leading-[1.05] font-bold text-white font-[Cinzel] mb-6">
-
-                      {slide.title}
-                    </h1>
-
-                    {/* DESCRIPTION */}
-                    <p className="text-base sm:text-xl lg:text-2xl text-gray-200 leading-relaxed mb-10 max-w-2xl">
-
-                      {slide.subtitle}
-                    </p>
-
-                    {/* BUTTONS */}
-                    <div className="flex flex-col sm:flex-row gap-4 sm:gap-5">
-
-                      {/* EXPLORE */}
-                      <button
-                        onClick={handleExplore}
-                        className="group h-14 sm:h-16 px-8 rounded-2xl bg-gradient-to-r from-[#6E0E12] to-[#8d141a] text-white font-semibold text-sm sm:text-base flex items-center justify-center gap-3 hover:scale-105 transition-all duration-300 shadow-[0_20px_50px_rgba(0,0,0,0.3)]"
-                      >
-
-                        Explore Products
-
-                        <FaArrowRight className="group-hover:translate-x-1 transition-all duration-300" />
-                      </button>
-
-                      {/* WHATSAPP */}
-                      <button
-                        onClick={handleWhatsApp}
-                        className="h-14 sm:h-16 px-8 rounded-2xl border border-[#D4A437]/40 bg-white/10 backdrop-blur-xl text-white font-semibold text-sm sm:text-base flex items-center justify-center gap-3 hover:bg-[#D4A437] hover:text-black transition-all duration-300"
-                      >
-
-                        <FaWhatsapp className="text-lg sm:text-xl" />
-
-                        Order on WhatsApp
-                      </button>
+                    <div className="w-1.5 h-1.5 rounded-full bg-white/20 hidden sm:block" />
+                    <div className="flex items-center gap-2 text-white/90 text-xs sm:text-sm font-medium">
+                      <FaShippingFast className="text-[#D4A437] text-sm" />
+                      <span>Fast Delivery Across India</span>
                     </div>
-
-                    {/* STATS */}
-                    <div className="flex flex-wrap gap-4 mt-12">
-
-                      <div className="px-5 py-3 rounded-2xl bg-white/10 backdrop-blur-xl border border-white/10 text-white text-sm">
-                        ⭐ 5000+ Happy Customers
-                      </div>
-
-                      <div className="px-5 py-3 rounded-2xl bg-white/10 backdrop-blur-xl border border-white/10 text-white text-sm">
-                        🚚 Fast Delivery
-                      </div>
-
-                      <div className="px-5 py-3 rounded-2xl bg-white/10 backdrop-blur-xl border border-white/10 text-white text-sm">
-                        🌶️ Authentic Andhra Taste
-                      </div>
+                    <div className="w-1.5 h-1.5 rounded-full bg-white/20 hidden sm:block" />
+                    <div className="flex items-center gap-2 text-white/90 text-xs sm:text-sm font-medium">
+                      <FaAward className="text-[#D4A437] text-xs" />
+                      <span>Authentic Andhra Taste</span>
                     </div>
                   </motion.div>
+
                 </div>
               </div>
             </div>
           </SwiperSlide>
         ))}
       </Swiper>
+
+      <style>{`
+        .swiper-pagination-bullet { background: rgba(255, 255, 255, 0.5) !important; border: 1px solid rgba(255,255,255,0.4); opacity: 0.6; }
+        .swiper-pagination-bullet-active { background: #D4A437 !important; width: 20px !important; border-radius: 4px !important; opacity: 1; border-color: #D4A437; }
+        .swiper-pagination { bottom: 24px !important; }
+      `}</style>
     </section>
   )
 }

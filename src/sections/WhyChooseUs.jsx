@@ -1,149 +1,140 @@
 import { motion } from "framer-motion"
-
 import {
   FaLeaf,
   FaMortarPestle,
   FaShieldAlt,
   FaShippingFast,
 } from "react-icons/fa"
-
-import {
-  GiHotSpices,
-  GiMeal,
-} from "react-icons/gi"
+import { GiHotSpices, GiMeal } from "react-icons/gi"
 
 function WhyChooseUs() {
-
   const features = [
     {
-      icon: <GiMeal />,
+      icon: <GiMeal size={24} />,
       title: "Homemade Recipes",
-      description:
-        "Prepared using authentic traditional Andhra homemade cooking methods.",
+      description: "Prepared using authentic traditional Andhra homemade cooking methods passed down through generations.",
+      color: "#0B5D3B",
     },
-
     {
-      icon: <FaLeaf />,
+      icon: <FaLeaf size={22} />,
       title: "Fresh Ingredients",
-      description:
-        "Only premium-quality fresh ingredients and natural spices are used.",
+      description: "Only premium-quality fresh ingredients, native cold-pressed oils, and natural spices are used.",
+      color: "#D4A437",
     },
-
     {
-      icon: <GiHotSpices />,
+      icon: <GiHotSpices size={24} />,
       title: "Authentic Taste",
-      description:
-        "Rich traditional flavours that bring the warmth of home food.",
+      description: "Rich native flavors that bring the unmatched warmth and comfort of home food to your plate.",
+      color: "#6E0E12",
     },
-
     {
-      icon: <FaShieldAlt />,
+      icon: <FaShieldAlt size={22} />,
       title: "Hygienic Preparation",
-      description:
-        "Prepared with utmost cleanliness and food safety standards.",
+      description: "Crafted in small controlled batches with utmost cleanliness and zero chemical preservatives.",
+      color: "#0B5D3B",
     },
-
     {
-      icon: <FaMortarPestle />,
+      icon: <FaMortarPestle size={22} />,
       title: "Traditional Spices",
-      description:
-        "Special homemade spice blends inspired by Andhra traditions.",
+      description: "Special custom stone-ground spice blends inspired by regional heritage and culinary secrets.",
+      color: "#D4A437",
     },
-
     {
-      icon: <FaShippingFast />,
+      icon: <FaShippingFast size={22} />,
       title: "Fast Delivery",
-      description:
-        "Freshly packed and safely delivered directly to your doorstep.",
+      description: "Freshly packed and securely shipped through premier delivery networks right to your doorstep.",
+      color: "#6E0E12",
     },
   ]
 
   return (
-    <section
-      id="whyus"
-      className="relative py-24 bg-gradient-to-b from-[#FFF9EE] to-[#f8ecd3] overflow-hidden"
-    >
+    <section id="why-us" className="relative py-24 bg-gradient-to-b from-[#FFFDF9] to-[#FFF9EE] overflow-hidden">
+      {/* BRAND BACKDROP ACCENT LIGHTS */}
+      <div className="absolute top-20 right-0 w-96 h-96 bg-[#D4A437]/5 blur-[120px] rounded-full pointer-events-none" />
+      <div className="absolute bottom-0 left-0 w-80 h-80 bg-[#0B5D3B]/5 blur-[120px] rounded-full pointer-events-none" />
 
-      {/* Background Effects */}
-      <div className="absolute top-20 right-0 w-96 h-96 bg-[#D4A437]/10 blur-3xl rounded-full"></div>
-
-      <div className="absolute bottom-0 left-0 w-80 h-80 bg-[#0B5D3B]/10 blur-3xl rounded-full"></div>
-
-      <div className="max-w-7xl mx-auto px-5 lg:px-10">
-
-        {/* Heading */}
+      <div className="max-w-7xl mx-auto px-6 sm:px-8 lg:px-12 relative z-10">
+        
+        {/* SECTION HEADER */}
         <motion.div
-          initial={{ opacity: 0, y: 60 }}
+          initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 1 }}
+          transition={{ duration: 0.6 }}
           viewport={{ once: true }}
-          className="text-center max-w-4xl mx-auto mb-20"
+          className="text-center max-w-3xl mx-auto mb-20"
         >
-
-          <div className="inline-block px-5 py-2 rounded-full bg-[#D4A437]/10 border border-[#D4A437]/20 mb-6">
-            <p className="text-[#6E0E12] font-semibold tracking-[3px] uppercase text-sm">
+          <div className="inline-flex px-4 py-1.5 rounded-full bg-[#D4A437]/10 border border-[#D4A437]/20 mb-4">
+            <p className="text-[#6E0E12] font-bold tracking-[3px] uppercase text-xs">
               Why Choose Us
             </p>
           </div>
 
-          <h2 className="text-4xl md:text-6xl font-bold font-[Cinzel] leading-tight text-[#1A1A1A] mb-6">
-            Crafted With
-            <span className="text-[#6E0E12]"> Tradition, </span>
-            Served With Love
+          <h2 
+            className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight text-[#1A1A1A] mb-4"
+            style={{ fontFamily: "'Cinzel', 'Georgia', serif" }}
+          >
+            Crafted With <span className="text-[#6E0E12]">Tradition</span>, Served With Love
           </h2>
 
-          <p className="text-lg text-gray-700 leading-relaxed">
-            We combine authentic homemade recipes, premium ingredients,
-            and traditional Andhra flavours to deliver a truly unforgettable taste experience.
+          <p className="text-sm sm:text-base text-gray-500 leading-relaxed max-w-xl mx-auto font-medium">
+            We combine authentic homemade recipes, premium ingredients, and traditional Andhra flavours to deliver a truly unforgettable culinary journey.
           </p>
         </motion.div>
 
-        {/* Cards */}
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-
+        {/* FEATURES INFRASTRUCTURE GRID */}
+        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
           {features.map((feature, index) => (
-
             <motion.div
               key={index}
-              initial={{ opacity: 0, y: 80 }}
+              initial={{ opacity: 0, y: 30 }}
               whileInView={{ opacity: 1, y: 0 }}
-              transition={{
-                duration: 0.8,
-                delay: index * 0.1,
-              }}
+              transition={{ duration: 0.5, delay: index * 0.08 }}
               viewport={{ once: true }}
-              whileHover={{
-                y: -10,
-              }}
-              className="group relative overflow-hidden bg-white/60 backdrop-blur-xl border border-white/30 rounded-[30px] p-8 shadow-xl hover:shadow-2xl transition-all duration-500"
+              className="group relative overflow-hidden rounded-2xl border border-gray-200/60 bg-white p-6 sm:p-8 shadow-[0_8px_30px_rgba(0,0,0,0.02)] hover:shadow-[0_20px_50px_rgba(0,0,0,0.07)] hover:-translate-y-1 transition-all duration-300"
             >
+              {/* Subtle Internal Gradient Background Hover */}
+              <div 
+                className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"
+                style={{
+                  background: `linear-gradient(135deg, ${feature.color}03 0%, transparent 100%)`
+                }}
+              />
 
-              {/* Hover Glow */}
-              <div className="absolute inset-0 bg-gradient-to-br from-[#D4A437]/10 to-[#0B5D3B]/10 opacity-0 group-hover:opacity-100 transition-all duration-500"></div>
-
-              {/* Icon */}
-              <div className="relative z-10 w-20 h-20 rounded-3xl bg-gradient-to-br from-[#6E0E12] to-[#0B5D3B] flex items-center justify-center text-3xl text-white shadow-2xl mb-8 group-hover:scale-110 transition-all duration-500">
-
+              {/* CLEAN VISUAL ICON EMBED VAULT */}
+              <div 
+                className="w-14 h-14 rounded-xl flex items-center justify-center shadow-xs mb-6 group-hover:scale-105 transition-transform duration-300 relative z-10"
+                style={{ 
+                  backgroundColor: `${feature.color}10`, 
+                  color: feature.color,
+                  border: `1px solid ${feature.color}15`
+                }}
+              >
                 {feature.icon}
               </div>
 
-              {/* Content */}
+              {/* CARD TEXT CONTENT DATA */}
               <div className="relative z-10">
-
-                <h3 className="text-2xl font-bold text-[#1A1A1A] mb-4">
+                <h3 
+                  className="text-lg sm:text-xl font-bold text-[#1A1A1A] mb-2.5 tracking-tight"
+                  style={{ fontFamily: "'Cinzel', 'Georgia', serif" }}
+                >
                   {feature.title}
                 </h3>
 
-                <p className="text-gray-600 leading-relaxed">
+                <p className="text-xs sm:text-sm text-gray-400 font-medium leading-relaxed">
                   {feature.description}
                 </p>
               </div>
 
-              {/* Decorative Blur */}
-              <div className="absolute -bottom-10 -right-10 w-32 h-32 bg-[#D4A437]/10 blur-3xl rounded-full"></div>
+              {/* SUBTLE BLUR CORNER GRAPHIC DECORATOR */}
+              <div 
+                className="absolute -bottom-12 -right-12 w-24 h-24 blur-xl rounded-full opacity-30 pointer-events-none"
+                style={{ backgroundColor: feature.color }}
+              />
             </motion.div>
           ))}
         </div>
+
       </div>
     </section>
   )

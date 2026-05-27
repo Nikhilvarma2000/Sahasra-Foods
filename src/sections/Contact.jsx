@@ -116,7 +116,7 @@ function Contact() {
 
                 <FaWhatsapp className="text-2xl text-[#25D366]" />
 
-                Order on WhatsApp
+                   WhatsApp us
               </button>
             </div>
           </motion.div>

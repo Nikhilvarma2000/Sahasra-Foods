@@ -2,6 +2,7 @@ import { useState } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import {
   FaPlus,
+  FaMinus,
   FaStar,
   FaFireAlt,
   FaHeart,
@@ -10,14 +11,17 @@ import {
   FaLeaf,
 } from "react-icons/fa"
 
+// 1. IMPORT YOUR CART CONTEXT HOOK
+import { useCart } from "../context/CartContext"
+
 /* ─────────────────────────────────────────────
    SPICE CONFIG
 ───────────────────────────────────────────── */
 const SPICE_MAP = {
-  Mild:   { color: "#16a34a", bg: "rgba(22,163,74,0.14)",   flames: 1 },
-  Medium: { color: "#d97706", bg: "rgba(217,119,6,0.14)",   flames: 2 },
-  Spicy:  { color: "#dc2626", bg: "rgba(220,38,38,0.14)",   flames: 3 },
-  Hot:    { color: "#7f1d1d", bg: "rgba(127,29,29,0.16)",   flames: 4 },
+  Mild:   { color: "#16a34a", bg: "rgba(22,163,74,0.14)" },
+  Medium: { color: "#d97706", bg: "rgba(217,119,6,0.14)" },
+  Spicy:  { color: "#dc2626", bg: "rgba(220,38,38,0.14)" },
+  Hot:    { color: "#7f1d1d", bg: "rgba(127,29,29,0.16)" },
 }
 
 /* ─────────────────────────────────────────────
@@ -29,7 +33,7 @@ function StarRow({ rating }) {
       {[1, 2, 3, 4, 5].map((s) => (
         <FaStar
           key={s}
-          size={11}
+          size={10}
           style={{ color: s <= Math.round(rating) ? "#D4A437" : "#D4A43740" }}
         />
       ))}
@@ -38,310 +42,268 @@ function StarRow({ rating }) {
 }
 
 /* ─────────────────────────────────────────────
-   PRODUCT CARD
+   MOBILE-FIRST RESPONSIVE PRODUCT CARD
 ───────────────────────────────────────────── */
 export default function ProductCard({ product, onOpen }) {
-  const [liked, setLiked]       = useState(false)
+  // 2. EXTRACT GLOBAL METHODS FROM YOUR REAL CART CONTEXT
+  const { cartItems, addToCart, updateQuantity, removeFromCart } = useCart()
+
+  const [liked, setLiked] = useState(false)
   const [addedPop, setAddedPop] = useState(false)
+  
+  // Local weight tracking layer
+  const [selectedWeight, setSelectedWeight] = useState("250g")
+  
   const spice = SPICE_MAP[product.spice] || SPICE_MAP.Medium
 
+  // Extract available weight tiers (Fallback safely if database structure changes later)
+  const weightOptions = product.variants ? product.variants.map(v => v.weight) : ["250g", "500g", "1kg"]
+
+  // Calculate matching structural pricing contexts
+  const getActivePrice = () => {
+    if (product.variants) {
+      const variant = product.variants.find(v => v.weight === selectedWeight)
+      if (variant) return variant.price
+    }
+    if (selectedWeight === "500g") return Math.round(product.basePrice * 1.9)
+    if (selectedWeight === "1kg") return Math.round(product.basePrice * 3.6)
+    return product.basePrice
+  }
+  const currentPrice = getActivePrice()
+
+  // 3. READ THE ACTIVE QUANTITY STATE MATCHING BOTH ID AND CURRENT WEIGHT SIZE
+  const currentCartItem = cartItems?.find(
+    (item) => item.id === product.id && item.weight === selectedWeight
+  )
+  const qty = currentCartItem ? currentCartItem.quantity : 0
+
   const handleAdd = (e) => {
-    e.stopPropagation()
+    e.stopPropagation() // Stops modal popup from triggering instantly
+    
+    // 4. FIRE THE REAL CONTEXT METHOD WITH SPECIFIED WEIGHT VALUES
+    if (addToCart) {
+      addToCart({
+        ...product,
+        weight: selectedWeight, 
+        price: currentPrice,
+        quantity: 1,
+      })
+    }
+
     setAddedPop(true)
     setTimeout(() => setAddedPop(false), 1600)
   }
 
   return (
     <motion.article
-      initial={{ opacity: 0, y: 36 }}
+      initial={{ opacity: 0, y: 20 }}
       whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, margin: "-40px" }}
-      whileHover={{ y: -6 }}
-      transition={{ duration: 0.45, ease: "easeOut" }}
-      onClick={() => onOpen(product)}
-      style={{
-        borderRadius: 28,
-        overflow: "hidden",
-        background: "#FFFDF5",
-        border: "1px solid rgba(212,164,55,0.15)",
-        boxShadow: "0 8px 40px rgba(0,0,0,0.07)",
-        cursor: "pointer",
-        position: "relative",
-        transition: "box-shadow 0.4s ease",
-      }}
-      onMouseEnter={(e) => (e.currentTarget.style.boxShadow = "0 24px 72px rgba(0,0,0,0.14)")}
-      onMouseLeave={(e) => (e.currentTarget.style.boxShadow = "0 8px 40px rgba(0,0,0,0.07)")}
+      viewport={{ once: true, margin: "-20px" }}
+      onClick={() => onOpen({ ...product, activeWeight: selectedWeight, currentPrice })}
+      className="group relative flex flex-col w-full overflow-hidden rounded-2xl border border-[#D4A437]/15 bg-[#FFFDF5] shadow-sm transition-all duration-300 select-none cursor-pointer active:scale-[0.99] md:hover:-translate-y-1.5 md:hover:shadow-xl md:rounded-[28px]"
     >
-
+      
       {/* ── IMAGE BLOCK ── */}
-      <div style={{ position: "relative", height: 280, overflow: "hidden" }}>
-
-        {/* Photo */}
+      <div className="relative w-full aspect-[4/3] overflow-hidden md:h-64 md:aspect-auto">
         <motion.img
           src={product.image}
           alt={product.name}
-          style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }}
-          whileHover={{ scale: 1.08 }}
-          transition={{ duration: 0.7, ease: "easeOut" }}
+          className="w-full h-full object-cover block"
+          whileHover={{ scale: 1.06 }}
+          transition={{ duration: 0.5, ease: "easeOut" }}
         />
 
-        {/* Gradient overlay — rich, cinematic */}
-        <div style={{
-          position: "absolute", inset: 0,
-          background: "linear-gradient(180deg, rgba(0,0,0,0.08) 0%, rgba(0,0,0,0.22) 45%, rgba(0,0,0,0.82) 100%)",
-        }} />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-black/10 mix-blend-multiply pointer-events-none" />
 
-        {/* Subtle grain texture */}
-        <div style={{
-          position: "absolute", inset: 0,
-          backgroundImage: "url(\"data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E\")",
-          opacity: 0.5, pointerEvents: "none",
-        }} />
-
-        {/* ── TOP-LEFT: Spice + Best Seller ── */}
-        <div style={{ position: "absolute", top: 14, left: 14, display: "flex", flexDirection: "column", gap: 7, zIndex: 10 }}>
-
-          {/* Spice pill */}
-          <div style={{
-            display: "inline-flex", alignItems: "center", gap: 5,
-            padding: "5px 12px", borderRadius: 999,
-            background: "rgba(0,0,0,0.40)",
-            backdropFilter: "blur(10px)",
-            border: "1px solid rgba(255,255,255,0.12)",
-            color: "#fff", fontSize: 11, fontWeight: 700,
-            letterSpacing: "0.04em",
-          }}>
-            <FaFireAlt style={{ color: spice.color, fontSize: 10 }} />
+        {/* BADGES */}
+        <div className="absolute top-2.5 left-2.5 flex flex-col gap-1.5 z-10 md:top-4 md:left-4">
+          <div className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-black/40 backdrop-blur-md border border-white/10 text-white text-[10px] font-bold tracking-wider uppercase md:text-xs">
+            <FaFireAlt style={{ color: spice.color }} className="text-[9px] md:text-xs" />
             {product.spice}
           </div>
 
-          {/* Best Seller ribbon */}
           {product.bestSeller && (
             <motion.div
-              initial={{ x: -20, opacity: 0 }}
+              initial={{ x: -10, opacity: 0 }}
               animate={{ x: 0, opacity: 1 }}
-              transition={{ delay: 0.2, duration: 0.4 }}
-              style={{
-                display: "inline-flex", alignItems: "center", gap: 5,
-                padding: "5px 12px", borderRadius: 999,
-                background: "linear-gradient(135deg, #6E0E12, #9B1B22)",
-                border: "1px solid rgba(255,255,255,0.15)",
-                color: "#fff", fontSize: 11, fontWeight: 700,
-                letterSpacing: "0.04em",
-                boxShadow: "0 4px 18px rgba(110,14,18,0.45)",
-              }}
+              className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-gradient-to-r from-[#6E0E12] to-[#9B1B22] text-white text-[10px] font-bold tracking-wider uppercase shadow-md shadow-[#6E0E12]/30 md:text-xs"
             >
-              <FaBolt style={{ fontSize: 9 }} />
+              <FaBolt className="text-[8px]" />
               Best Seller
             </motion.div>
           )}
         </div>
 
-        {/* ── TOP-RIGHT: Heart ── */}
+        {/* FAVORITE BUTTON */}
         <motion.button
-          onClick={(e) => { e.stopPropagation(); setLiked((l) => !l) }}
-          whileTap={{ scale: 0.82 }}
-          style={{
-            position: "absolute", top: 14, right: 14, zIndex: 10,
-            width: 38, height: 38, borderRadius: "50%",
-            background: liked ? "rgba(110,14,18,0.90)" : "rgba(0,0,0,0.35)",
-            backdropFilter: "blur(10px)",
-            border: "1px solid rgba(255,255,255,0.14)",
-            display: "flex", alignItems: "center", justifyContent: "center",
-            color: liked ? "#fff" : "rgba(255,255,255,0.85)",
-            cursor: "pointer", transition: "background 0.25s",
+          onClick={(e) => {
+            e.stopPropagation()
+            setLiked((l) => !l)
           }}
+          whileTap={{ scale: 0.85 }}
+          className={`absolute top-2.5 right-2.5 z-10 w-8 h-8 rounded-full flex items-center justify-center border backdrop-blur-md transition-colors pointer-events-auto ${
+            liked 
+              ? "bg-[#6E0E12]/90 border-transparent text-white" 
+              : "bg-black/30 border-white/10 text-white/90"
+          } md:top-4 md:right-4 md:w-9 md:h-9`}
         >
-          <FaHeart size={13} />
+          <FaHeart size={12} className={liked ? "scale-110" : ""} />
         </motion.button>
-
-        {/* ── BOTTOM TEXT on image ── */}
-        <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, padding: "18px 18px 16px", zIndex: 10 }}>
-
-          {/* Category micro-label */}
-          <p style={{
-            fontSize: 10, letterSpacing: "0.12em", fontWeight: 700,
-            textTransform: "uppercase", color: "#D4A437",
-            marginBottom: 5,
-          }}>
-            {product.category}
-          </p>
-
-          {/* Product name */}
-          <h3 style={{
-            fontFamily: "Cinzel, serif", fontSize: "clamp(1.3rem, 3vw, 1.6rem)",
-            fontWeight: 800, color: "#fff", lineHeight: 1.15,
-            marginBottom: 6, letterSpacing: "-0.01em",
-          }}>
-            {product.name}
-          </h3>
-
-          {/* Description */}
-          <p style={{
-            fontSize: 12, color: "rgba(255,255,255,0.72)",
-            lineHeight: 1.55, display: "-webkit-box",
-            WebkitLineClamp: 2, WebkitBoxOrient: "vertical",
-            overflow: "hidden",
-          }}>
-            {product.description}
-          </p>
-        </div>
       </div>
 
-      {/* ── BOTTOM CARD ── */}
-      <div style={{ padding: "18px 18px 18px", background: "#FFFDF5", position: "relative" }}>
+      {/* ── CONTENT BODY ── */}
+      <div className="flex flex-col flex-1 p-3.5 relative md:p-5">
+        
+        <div className="absolute top-0 left-4 right-4 h-px bg-gradient-to-r from-transparent via-[#D4A437]/20 to-transparent pointer-events-none" />
 
-        {/* Gold top line accent */}
-        <div style={{
-          position: "absolute", top: 0, left: 18, right: 18, height: 1,
-          background: "linear-gradient(to right, transparent, rgba(212,164,55,0.4), transparent)",
-        }} />
+        <p className="text-[9px] tracking-widest font-extrabold text-uppercase text-[#D4A437] mb-0.5 uppercase md:text-xs md:mb-1">
+          {product.category}
+        </p>
 
-        {/* Row 1 — Rating + Price */}
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 14 }}>
+        <h3 className="font-serif font-bold text-sm text-[#1A1A1A] leading-tight mb-1 line-clamp-1 group-hover:text-[#6E0E12] transition-colors md:text-xl md:mb-1.5">
+          {product.name}
+        </h3>
 
-          {/* Rating */}
-          <div style={{ display: "flex", flexDirection: "column", gap: 3 }}>
-            <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+        <p className="text-xs text-gray-500 leading-relaxed mb-3 line-clamp-2 md:text-sm md:mb-4">
+          {product.description}
+        </p>
+
+        {/* ── SATISFYING INLINE WEIGHT SELECTION TABS ── */}
+        <div className="mb-4 bg-gray-100/80 p-1 rounded-xl flex items-center gap-1 border border-gray-200/40">
+          {weightOptions.map((weight) => {
+            const isSelected = selectedWeight === weight
+            return (
+              <button
+                key={weight}
+                onClick={(e) => {
+                  e.stopPropagation()
+                  setSelectedWeight(weight)
+                }}
+                className={`flex-1 text-center py-1.5 text-[11px] md:text-xs font-bold rounded-lg transition-all relative ${
+                  isSelected 
+                    ? "bg-white text-[#0B5D3B] shadow-xs" 
+                    : "text-gray-500 hover:text-gray-900"
+                }`}
+              >
+                {weight}
+              </button>
+            )
+          })}
+        </div>
+
+        {/* Rating & Pricing Row */}
+        <div className="flex items-center justify-between gap-2 mb-4 mt-auto">
+          <div className="flex flex-col gap-0.5">
+            <div className="flex items-center gap-1">
               <StarRow rating={product.rating} />
-              <span style={{ fontSize: 12, fontWeight: 700, color: "#1A1A1A" }}>
+              <span className="text-xs font-bold text-gray-800 md:text-sm">
                 {product.rating}
               </span>
             </div>
-            <p style={{ fontSize: 11, color: "#9CA3AF" }}>
-              {product.reviews}+ happy customers
+            <p className="text-[10px] text-gray-400 hidden sm:block">
+              {product.reviews}+ reviews
             </p>
           </div>
 
-          {/* Price block */}
-          <div style={{
-            textAlign: "right",
-            padding: "8px 14px", borderRadius: 14,
-            background: "linear-gradient(135deg, #FFF7E0, #FFFDF5)",
-            border: "1px solid rgba(212,164,55,0.22)",
-          }}>
-            <p style={{ fontSize: 9, letterSpacing: "0.1em", color: "#9CA3AF", fontWeight: 600, textTransform: "uppercase", marginBottom: 2 }}>
-              From
+          {/* Dynamic Price Display Block */}
+          <div className="text-right px-3 py-1.5 rounded-xl bg-gradient-to-br from-[#FFF7E0] to-[#FFFDF5] border border-[#D4A437]/20 shadow-2xs min-w-[70px]">
+            <p className="text-[8px] tracking-wider text-gray-400 font-semibold uppercase md:text-[9px]">
+              Price
             </p>
-            <p style={{ fontFamily: "Cinzel, serif", fontSize: "1.45rem", fontWeight: 900, color: "#6E0E12", lineHeight: 1 }}>
-              ₹{product.basePrice}
+            <p className="font-serif font-black text-base text-[#6E0E12] md:text-xl">
+              ₹{currentPrice}
             </p>
           </div>
         </div>
 
-        {/* Row 2 — Tags row */}
-        <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginBottom: 14 }}>
-          {[
-            { label: "Homemade",       bg: "rgba(11,93,59,0.09)",  color: "#0B5D3B" },
-            { label: "Authentic",      bg: "rgba(212,164,55,0.12)", color: "#92650A" },
-            { label: product.spice === "Mild" ? "Vegetarian" : "Premium", bg: "rgba(110,14,18,0.09)", color: "#6E0E12" },
-          ].map((tag) => (
-            <span
-              key={tag.label}
-              style={{
-                display: "inline-block", padding: "4px 11px", borderRadius: 999,
-                fontSize: 10, fontWeight: 700, letterSpacing: "0.05em",
-                background: tag.bg, color: tag.color,
-              }}
-            >
-              {tag.label}
-            </span>
-          ))}
-
-          {/* Fresh today */}
-          <span style={{
-            display: "inline-flex", alignItems: "center", gap: 4,
-            padding: "4px 11px", borderRadius: 999,
-            fontSize: 10, fontWeight: 700,
-            background: "rgba(11,93,59,0.09)", color: "#0B5D3B",
-          }}>
-            <FaLeaf size={8} /> Fresh Today
+        {/* Tags Row */}
+        <div className="flex flex-wrap gap-1 mb-4 max-h-[48px] overflow-hidden md:gap-1.5 md:mb-5">
+          <span className="inline-block px-2 py-0.5 rounded-md text-[9px] font-bold tracking-wide bg-[#0B5D3B]/10 text-[#0B5D3B] md:text-xs">
+            Homemade
+          </span>
+          <span className="inline-block px-2 py-0.5 rounded-md text-[9px] font-bold tracking-wide bg-[#D4A437]/10 text-[#92650A] md:text-xs">
+            Authentic
+          </span>
+          <span className="inline-flex items-center gap-0.5 px-2 py-0.5 rounded-md text-[9px] font-bold tracking-wide bg-[#0B5D3B]/10 text-[#0B5D3B] md:text-xs">
+            <FaLeaf size={7} /> Fresh
           </span>
         </div>
 
-        {/* Row 3 — CTA buttons */}
-        <div style={{ display: "flex", gap: 10, position: "relative" }}>
-
-          {/* Bag icon button */}
+        {/* ── CTA BUTTONS ACTION ROW ── */}
+        <div className="flex items-center gap-2 relative mt-auto">
+          
           <motion.button
-            whileTap={{ scale: 0.9 }}
-            onClick={(e) => { e.stopPropagation(); onOpen(product) }}
-            style={{
-              width: 50, height: 50, borderRadius: 16, flexShrink: 0,
-              background: "#FFF9EE",
-              border: "1.5px solid rgba(212,164,55,0.22)",
-              display: "flex", alignItems: "center", justifyContent: "center",
-              color: "#1A1A1A", cursor: "pointer", transition: "all 0.25s",
+            whileTap={{ scale: 0.92 }}
+            onClick={(e) => {
+              e.stopPropagation()
+              onOpen({ ...product, activeWeight: selectedWeight, currentPrice })
             }}
-            onMouseEnter={(e) => { e.currentTarget.style.background = "#0B5D3B"; e.currentTarget.style.color = "#fff" }}
-            onMouseLeave={(e) => { e.currentTarget.style.background = "#FFF9EE"; e.currentTarget.style.color = "#1A1A1A" }}
+            className="w-10 h-10 rounded-xl flex-shrink-0 bg-[#FFF9EE] border border-[#D4A437]/30 flex items-center justify-center text-gray-800 transition-colors md:w-12 md:h-12 md:rounded-2xl md:hover:bg-[#0B5D3B] md:hover:text-white"
           >
-            <FaShoppingBag size={16} />
+            <FaShoppingBag size={14} className="md:size-4" />
           </motion.button>
 
-          {/* Main CTA */}
-          <motion.button
-            whileTap={{ scale: 0.97 }}
-            onClick={handleAdd}
-            style={{
-              flex: 1, height: 50, borderRadius: 16,
-              background: "linear-gradient(135deg, #0B5D3B 0%, #145c3f 50%, #6E0E12 100%)",
-              color: "#fff", fontWeight: 700, fontSize: 14,
-              display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
-              border: "none", cursor: "pointer", overflow: "hidden", position: "relative",
-              boxShadow: "0 8px 28px rgba(11,93,59,0.30)",
-            }}
-          >
-            {/* Shine sweep */}
-            <motion.div
-              initial={{ x: "-120%" }}
-              whileHover={{ x: "120%" }}
-              transition={{ duration: 0.6, ease: "easeInOut" }}
-              style={{
-                position: "absolute", inset: 0,
-                background: "linear-gradient(105deg, transparent 30%, rgba(255,255,255,0.18) 50%, transparent 70%)",
-                pointerEvents: "none",
-              }}
-            />
-            <FaPlus size={12} style={{ position: "relative", zIndex: 1 }} />
-            <span style={{ position: "relative", zIndex: 1 }}>Customize & Add</span>
-          </motion.button>
+          {/* DYNAMIC ADAPTIVE INTERACTION SWITCHER */}
+          {qty === 0 ? (
+            <motion.button
+              whileTap={{ scale: 0.98 }}
+              onClick={handleAdd}
+              className="flex-1 h-10 rounded-xl bg-gradient-to-r from-[#0B5D3B] via-[#145c3f] to-[#1e704e] text-white font-bold text-xs flex items-center justify-center gap-1.5 shadow-md shadow-[#0B5D3B]/20 overflow-hidden relative md:h-12 md:rounded-2xl md:text-sm"
+            >
+              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:animate-[shimmer_1.5s_infinite] pointer-events-none" />
+              <FaPlus size={10} />
+              <span>Add {selectedWeight}</span>
+            </motion.button>
+          ) : (
+            <div className="flex-1 h-10 rounded-xl bg-[#0B5D3B] text-white font-bold text-xs flex items-center justify-between px-3 shadow-md shadow-[#0B5D3B]/20 md:h-12 md:rounded-2xl md:text-sm">
+              <button
+                onClick={(e) => {
+                  e.stopPropagation()
+                  if (qty <= 1) {
+                    removeFromCart(product.id, selectedWeight)
+                  } else {
+                    updateQuantity(product.id, selectedWeight, "decrease")
+                  }
+                }}
+                className="p-2 text-white/80 hover:text-white active:scale-90 transition-colors"
+              >
+                <FaMinus size={10} />
+              </button>
+              
+              <span className="text-xs font-black tracking-wide md:text-sm">
+                {qty} ({selectedWeight}) Added
+              </span>
 
-          {/* "Added!" pop */}
+              <button
+                onClick={(e) => {
+                  e.stopPropagation()
+                  updateQuantity(product.id, selectedWeight, "increase")
+                }}
+                className="p-2 text-white/80 hover:text-white active:scale-90 transition-colors"
+              >
+                <FaPlus size={10} />
+              </button>
+            </div>
+          )}
+
+          {/* Responsive Floating Toast Alert */}
           <AnimatePresence>
             {addedPop && (
               <motion.div
-                initial={{ opacity: 0, y: 8, scale: 0.88 }}
+                initial={{ opacity: 0, y: 6, scale: 0.9 }}
                 animate={{ opacity: 1, y: 0, scale: 1 }}
-                exit={{ opacity: 0, y: -8, scale: 0.88 }}
-                transition={{ duration: 0.22 }}
-                style={{
-                  position: "absolute", bottom: "calc(100% + 8px)", right: 0,
-                  background: "#0B5D3B", color: "#fff",
-                  padding: "6px 14px", borderRadius: 10,
-                  fontSize: 12, fontWeight: 700,
-                  boxShadow: "0 6px 20px rgba(11,93,59,0.35)",
-                  whiteSpace: "nowrap", zIndex: 20,
-                }}
+                exit={{ opacity: 0, y: -6, scale: 0.9 }}
+                transition={{ duration: 0.18 }}
+                className="absolute bottom-full right-0 mb-2 bg-[#0B5D3B] text-white px-3 py-1.5 rounded-lg text-xs font-bold shadow-lg whitespace-nowrap z-20"
               >
-                ✓ Added to cart
+                ✓ {selectedWeight} added to cart
               </motion.div>
             )}
           </AnimatePresence>
         </div>
       </div>
 
-      {/* ── Hover border glow ── */}
-      <motion.div
-        initial={{ opacity: 0 }}
-        whileHover={{ opacity: 1 }}
-        transition={{ duration: 0.3 }}
-        style={{
-          position: "absolute", inset: 0, borderRadius: 28,
-          border: "1.5px solid rgba(212,164,55,0.45)",
-          pointerEvents: "none",
-        }}
-      />
+      <div className="absolute inset-0 rounded-2xl border-1.5 border-transparent transition-colors pointer-events-none md:rounded-[28px] md:group-hover:border-[#D4A437]/40" />
     </motion.article>
   )
 }
