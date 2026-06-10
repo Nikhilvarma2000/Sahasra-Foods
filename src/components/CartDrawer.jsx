@@ -127,36 +127,94 @@ function CartDrawer({ isOpen, onClose, onCheckout }) {
               </button>
             </div>
 
-            {/* HIGH-CONVERTING FREE SHIPPING PROGRESS CONSOLE */}
+            {/* FREE DELIVERY TRACKER */}
             {cartItems.length > 0 && (
-              <div className="bg-white border-b border-gray-100/80 px-5 py-3.5 flex flex-col gap-2 flex-shrink-0">
-                <div className="flex items-center justify-between text-xs font-bold text-gray-700">
-                  <span className="flex items-center gap-1.5 text-gray-800">
-                    <FaTruck className={isFreeShipping ? "text-[#0B5D3B]" : "text-[#D4A437]"} size={13} />
-                    {isFreeShipping ? (
-                      <span className="text-[#0B5D3B]">Congrats! Free Delivery unlocked</span>
-                    ) : (
-                      <span>Free Delivery Goal</span>
-                    )}
-                  </span>
-                  <span className="font-mono text-gray-500">₹{cartTotal} / ₹{FREE_SHIPPING_THRESHOLD}</span>
-                </div>
-                
-                {/* Visual Tracker Line wrapper */}
-                <div className="w-full h-1.5 bg-gray-100 rounded-full overflow-hidden relative">
-                  <motion.div 
-                    initial={{ width: 0 }}
-                    animate={{ width: `${shippingProgress}%` }}
-                    transition={{ duration: 0.5, ease: "easeOut" }}
-                    className={`h-full rounded-full ${isFreeShipping ? "bg-[#0B5D3B]" : "bg-[#D4A437]"}`}
-                  />
-                </div>
-                
-                {!isFreeShipping && (
-                  <p className="text-[11px] font-semibold text-gray-400">
-                    Add <span className="text-[#6E0E12] font-bold">₹{FREE_SHIPPING_THRESHOLD - cartTotal}</span> more to unlock free delivery code rewards.
-                  </p>
-                )}
+              <div className="border-b border-gray-100/80 flex-shrink-0">
+                <AnimatePresence mode="wait" initial={false}>
+                  {isFreeShipping ? (
+                    /* ── UNLOCKED STATE ── */
+                    <motion.div
+                      key="unlocked"
+                      initial={{ opacity: 0, y: -10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -10 }}
+                      transition={{ duration: 0.35, ease: "easeOut" }}
+                      className="px-5 py-4"
+                    >
+                      <div className="flex items-center gap-3 bg-gradient-to-r from-emerald-50 to-green-50/60 border border-emerald-100 rounded-2xl px-4 py-3.5">
+                        <motion.div
+                          initial={{ scale: 0.6, rotate: -20 }}
+                          animate={{ scale: 1, rotate: 0 }}
+                          transition={{ type: "spring", stiffness: 320, damping: 18, delay: 0.1 }}
+                          className="w-10 h-10 rounded-full bg-[#0B5D3B] flex items-center justify-center flex-shrink-0 shadow-lg shadow-[#0B5D3B]/25"
+                        >
+                          <FaTruck size={15} className="text-white" />
+                        </motion.div>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-xs font-black text-[#0B5D3B] leading-tight">
+                            🎉 Free Delivery Unlocked!
+                          </p>
+                          <p className="text-[10px] text-emerald-600 font-semibold mt-0.5">
+                            You saved ₹{SHIPPING_FEE} on delivery
+                          </p>
+                        </div>
+                        <span className="text-2xl select-none">🎁</span>
+                      </div>
+                    </motion.div>
+                  ) : (
+                    /* ── PROGRESS STATE ── */
+                    <motion.div
+                      key="progress"
+                      initial={{ opacity: 0, y: 8 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: 8 }}
+                      transition={{ duration: 0.25 }}
+                      className="px-5 py-4 space-y-2.5"
+                    >
+                      {/* TOP ROW */}
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-1.5">
+                          <FaTruck size={11} className="text-[#D4A437] flex-shrink-0" />
+                          <span className="text-[11px] font-bold text-gray-700 leading-tight">
+                            Add{" "}
+                            <span className="text-[#6E0E12] font-black">
+                              ₹{FREE_SHIPPING_THRESHOLD - cartTotal}
+                            </span>{" "}
+                            more for free delivery
+                          </span>
+                        </div>
+                        <span className="text-[10px] font-black text-gray-400 font-mono tabular-nums flex-shrink-0">
+                          {Math.round(shippingProgress)}%
+                        </span>
+                      </div>
+
+                      {/* PROGRESS TRACK */}
+                      <div className="relative pr-5">
+                        <div className="w-full h-2.5 bg-gray-100 rounded-full overflow-hidden">
+                          <motion.div
+                            initial={{ width: 0 }}
+                            animate={{ width: `${shippingProgress}%` }}
+                            transition={{ duration: 0.75, ease: [0.34, 1.2, 0.64, 1] }}
+                            className="h-full rounded-full"
+                            style={{
+                              background: "linear-gradient(90deg, #D4A437 0%, #e8b84b 50%, #0B5D3B 100%)",
+                            }}
+                          />
+                        </div>
+                        {/* Goal gift marker */}
+                        <div className="absolute right-0 top-1/2 -translate-y-1/2 w-6 h-6 rounded-full bg-white border-2 border-gray-200 flex items-center justify-center text-xs shadow-sm select-none">
+                          🎁
+                        </div>
+                      </div>
+
+                      {/* BOTTOM LABELS */}
+                      <div className="flex items-center justify-between text-[10px] font-semibold">
+                        <span className="text-[#0B5D3B] font-bold">₹{cartTotal} added</span>
+                        <span className="text-gray-400">Goal: ₹{FREE_SHIPPING_THRESHOLD}</span>
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
               </div>
             )}
 
