@@ -11,22 +11,21 @@ import {
 import { useEffect } from "react"
 import { useCart } from "../context/CartContext"
 
-// MODIFIED: Free shipping tier ceiling updated to 1000rs
+// Free shipping tier ceiling updated to 1000rs
 const FREE_SHIPPING_THRESHOLD = 1000;
 const SHIPPING_FEE = 40;
 
 function CartDrawer({ isOpen, onClose, onCheckout }) {
   const { cartItems, cartTotal, removeFromCart, updateQuantity } = useCart()
 
-  // LOCK BODY SCROLL WHEN DRAWER IS OPEN
   useEffect(() => {
     if (isOpen) {
       document.body.style.overflow = "hidden"
     } else {
-      document.body.style.overflow = "unset"
+      document.body.style.overflow = "auto"
     }
     return () => {
-      document.body.style.overflow = "unset"
+      document.body.style.overflow = "auto"
     }
   }, [isOpen])
 
@@ -43,12 +42,41 @@ function CartDrawer({ isOpen, onClose, onCheckout }) {
     }
   }, [onClose])
 
-  const handleDecrease = (id, weight, quantity) => {
+  // SAFE CLOSING BUFFER HANDLER TO PREVENT MOBILE TOUCH-THROUGH
+  const handleSafeClose = (e) => {
+    if (e) {
+      e.preventDefault()
+      e.stopPropagation() // Absorbs the touch event layer entirely
+    }
+    onClose()
+  }
+
+  const handleDecrease = (e, id, weight, quantity) => {
+    if (e) {
+      e.preventDefault()
+      e.stopPropagation()
+    }
     if (quantity <= 1) {
       removeFromCart(id, weight)
       return
     }
     updateQuantity(id, weight, "decrease")
+  }
+
+  const handleIncrease = (e, id, weight) => {
+    if (e) {
+      e.preventDefault()
+      e.stopPropagation()
+    }
+    updateQuantity(id, weight, "increase")
+  }
+
+  const handleRemove = (e, id, weight) => {
+    if (e) {
+      e.preventDefault()
+      e.stopPropagation()
+    }
+    removeFromCart(id, weight)
   }
 
   // Calculate parameters for delivery rewards layer
@@ -67,8 +95,8 @@ function CartDrawer({ isOpen, onClose, onCheckout }) {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            onClick={onClose}
-            className="fixed inset-0 z-[999] bg-black/60 backdrop-blur-xs"
+            onClick={handleSafeClose}
+            className="fixed inset-0 z-[9999] bg-black/60 backdrop-blur-xs pointer-events-auto"
           />
 
           {/* MAIN SURFACE DRAWER SHEET */}
@@ -76,8 +104,8 @@ function CartDrawer({ isOpen, onClose, onCheckout }) {
             initial={{ x: "100%" }}
             animate={{ x: 0 }}
             exit={{ x: "100%" }}
-            transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
-            className="fixed top-0 right-0 z-[1000] h-[100dvh] w-full sm:max-w-md bg-[#FFFDF9] shadow-2xl border-l border-[#D4A437]/10 flex flex-col overflow-hidden"
+            transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
+            className="fixed top-0 right-0 z-[10000] h-[100dvh] w-full sm:max-w-md bg-[#FFFDF9] shadow-2xl border-l border-[#D4A437]/10 flex flex-col overflow-hidden select-none touch-manipulation pointer-events-auto"
           >
             {/* HEADER BLOCK */}
             <div className="bg-white border-b border-gray-100 px-5 py-4 flex items-center justify-between flex-shrink-0">
@@ -92,8 +120,8 @@ function CartDrawer({ isOpen, onClose, onCheckout }) {
 
               {/* ACTION CLOSE CONTROLLER */}
               <button
-                onClick={onClose}
-                className="w-9 h-9 rounded-full bg-gray-50 border border-gray-100 text-gray-500 hover:text-gray-900 flex items-center justify-center active:scale-90 transition-all cursor-pointer"
+                onClick={handleSafeClose}
+                className="w-9 h-9 rounded-full bg-gray-50 border border-gray-100 text-gray-500 hover:text-gray-900 flex items-center justify-center cursor-pointer touch-manipulation active:scale-90 transition-transform"
               >
                 <FaTimes size={13} />
               </button>
@@ -161,7 +189,7 @@ function CartDrawer({ isOpen, onClose, onCheckout }) {
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, scale: 0.95 }}
                         transition={{ duration: 0.22 }}
-                        className="flex items-center gap-3.5 py-4 bg-transparent"
+                        className="flex items-center gap-3.5 py-4 bg-transparent border-b border-gray-100/40 last:border-b-0"
                       >
                         {/* STREAM IMAGE COMPONENT FRAME */}
                         <img
@@ -193,7 +221,7 @@ function CartDrawer({ isOpen, onClose, onCheckout }) {
                         {/* INTERACTIVE ROW STEP CONTROL HOOK BUTTONS */}
                         <div className="flex flex-col items-end gap-3 flex-shrink-0">
                           <button
-                            onClick={() => removeFromCart(item.id, item.weight)}
+                            onClick={(e) => handleRemove(e, item.id, item.weight)}
                             className="p-1 text-gray-300 hover:text-red-700 transition-colors cursor-pointer active:scale-90"
                           >
                             <FaTrash size={11} />
@@ -202,8 +230,8 @@ function CartDrawer({ isOpen, onClose, onCheckout }) {
                           {/* COUNTER TOGGLE INTERFACE */}
                           <div className="flex items-center bg-[#0B5D3B] text-white rounded-lg h-7 px-1 shadow-xs">
                             <button
-                              onClick={() => handleDecrease(item.id, item.weight, item.quantity)}
-                              className="p-1.5 text-white/80 hover:text-white transition-opacity cursor-pointer"
+                              onClick={(e) => handleDecrease(e, item.id, item.weight, item.quantity)}
+                              className="p-1.5 text-white/80 hover:text-white transition-opacity cursor-pointer touch-manipulation"
                             >
                               <FaMinus size={8} strokeWidth={2} />
                             </button>
@@ -211,8 +239,8 @@ function CartDrawer({ isOpen, onClose, onCheckout }) {
                               {item.quantity}
                             </span>
                             <button
-                              onClick={() => updateQuantity(item.id, item.weight, "increase")}
-                              className="p-1.5 text-white/80 hover:text-white transition-opacity cursor-pointer"
+                              onClick={(e) => handleIncrease(e, item.id, item.weight)}
+                              className="p-1.5 text-white/80 hover:text-white transition-opacity cursor-pointer touch-manipulation"
                             >
                               <FaPlus size={8} strokeWidth={2} />
                             </button>
@@ -227,7 +255,7 @@ function CartDrawer({ isOpen, onClose, onCheckout }) {
 
             {/* CHECKOUT ACCOUNTING CONTROL STEPS FOOTER CONTAINER */}
             {cartItems.length > 0 && (
-              <div className="bg-white border-t border-gray-100 p-4 sticky bottom-0 z-20 flex-shrink-0 space-y-4 shadow-[0_-10px_30px_rgba(0,0,0,0.02)]">
+              <div className="bg-white border-t border-gray-100 p-4 sticky bottom-0 z-20 flex-shrink-0 space-y-4 shadow-[0_-10px_30px_rgba(0,0,0,0.02)] bg-[#FFFDF9]">
                 
                 {/* RESTAURANT STYLE BILL SUMMARY CARD LAYOUT FRAME */}
                 <div className="bg-gray-50/80 rounded-xl p-3 border border-gray-100 text-xs font-semibold space-y-2.5">
@@ -252,8 +280,14 @@ function CartDrawer({ isOpen, onClose, onCheckout }) {
 
                 {/* WHATSAPP CTA DISPATCH CONTROL BUTTON */}
                 <button
-                  onClick={onCheckout}
-                  className="group relative w-full h-13 rounded-xl bg-gradient-to-r from-[#0B5D3B] via-[#145c3f] to-[#0B5D3B] text-white flex items-center justify-between px-4 shadow-xl shadow-[#0B5D3B]/15 active:scale-[0.99] transition-all overflow-hidden cursor-pointer"
+                  onClick={(e) => {
+                    if (e) {
+                      e.preventDefault()
+                      e.stopPropagation()
+                    }
+                    if (onCheckout) onCheckout()
+                  }}
+                  className="group relative w-full h-13 rounded-xl bg-gradient-to-r from-[#0B5D3B] via-[#145c3f] to-[#0B5D3B] text-white flex items-center justify-between px-4 shadow-xl shadow-[#0B5D3B]/15 active:scale-[0.99] transition-all overflow-hidden cursor-pointer touch-manipulation"
                 >
                   <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:animate-[shimmer_1.2s_infinite] pointer-events-none" />
 
